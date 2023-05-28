@@ -5,74 +5,109 @@
 @using BlazorDatasheet.Validation
 @using BlazorDatasheet.Render
 @using BlazorDatasheet.SharedPages.Data
+@using Microsoft.JSInterop;
+@inject IJSRuntime JSRuntime
 
-<PageTitle>Index</PageTitle>
-
-<p>
-    Blazor DataSheet is an excel-like editor for cellular values. Below shows some of the features of the data sheet. Sample code is available on <a href="https://github.com/anmcgrath/BlazorDatasheet">GitHub</a>
-</p>
-
-<Datasheet Theme="@Theme"
-           Sheet="Sheet"
-           StickyHeadings="true"
-           IsFixedHeight="true">
-
-</Datasheet>
+<PageTitle>Random Group</PageTitle>
 
 <div>
     <button @onclick="InsertRowAfterSelection">Insert row after selection</button>
     <button @onclick="InsertColAfterSelection">Insert col after selection</button>
     <button @onclick="RemoveCol">RemoveCol</button>
-    <button @onclick="() => Sheet.Commands.Undo()">Undo</button>
-    <button @onclick="() => Sheet.Commands.Redo()">Redo</button>
-    <button @onclick="@(() => Sheet.Selection.Value = "Bob")">Set to Bob</button>
-    <button @onclick="@(() => Sheet.SetFormat(new CellFormat() { BackgroundColor = "red" }, Sheet.Selection))">Set bg to red</button>
-    <button @onclick="@(() => Sheet.SetFormat(new CellFormat() { BackgroundColor = "blue" }, Sheet.Selection))">Set bg to blue</button>
-    <button @onclick="@(() => Sheet.SetFormat(new CellFormat() { ForegroundColor = "green" }, Sheet.Selection))">Set font colour to green</button>
-    <button @onclick="@(() => Sheet.MergeCells(Sheet.Selection))">Merge cells</button>
+    <button @onclick="() => Sheet!.Commands.Undo()">Undo</button>
+    <button @onclick="() => Sheet!.Commands.Redo()">Redo</button>
 </div>
 
-<div>
-    <input id="darkmode-toggle" type="checkbox" @bind="IsDarkMode" />
-    <label for="darkmode-toggle">Darkmode</label>
+<div class="form-group">
+    <label for="textbox-input" class="form-label">Text Input:</label>
+    <input id="textbox-input" type="text" class="form-control" />
+</div>
+
+<div class="form-group">
+    <label for="number-input" class="form-label">Number of Users:</label>
+    <input type="number" @bind="myNumber" class="form-control" @oninput="HandleNumberInput" @ref="numberInput" min="2" max="500" />
+</div>
+
+<div class="form-group">
+    <Datasheet Theme="@Theme"
+               Sheet="Sheet"
+               StickyHeadings="true"
+               IsFixedHeight="false">
+    </Datasheet>
 </div>
 
 @code {
 
-    private Sheet Sheet;
-    private List<Person> People { get; set; }
-    private ObjectEditor<Person> _editor;
+    private Sheet? Sheet = null;
+    private List<Person> ?People { get; set; }
+    private ObjectEditor<Person> ?_editor;
     private string Theme => IsDarkMode ? "dark" : "default";
     private bool IsDarkMode { get; set; }
+    private int myNumber { get; set; }
+    private ElementReference numberInput;
+    private int peopleMin = 2;
+    private int peopleMax = 500;
+
 
     private void InsertRowAfterSelection()
     {
-        if (Sheet.Selection.ActiveRegion == null)
+        if (Sheet!.Selection.ActiveRegion == null)
         {
             return;
         }
-        _editor.InsertAt(new Person(), Sheet.Selection.ActiveRegion.TopLeft.Row);
+        _editor!.InsertAt(new Person(), Sheet.Selection.ActiveRegion.TopLeft.Row);
     }
 
     private void InsertColAfterSelection()
     {
-        if (Sheet.Selection.ActiveRegion == null)
+        if (Sheet!.Selection.ActiveRegion == null)
         {
             return;
         }
-        _editor.Sheet.InsertColAfter(Sheet.Selection.ActiveRegion.Left);
+        _editor!.Sheet.InsertColAfter(Sheet.Selection.ActiveRegion.Left);
     }
 
     private void RemoveCol()
     {
-        if (Sheet.Selection.ActiveRegion == null)
+        if (Sheet!.Selection.ActiveRegion == null)
         {
             return;
         }
-        _editor.Sheet.RemoveCol(Sheet.Selection.ActiveRegion.Left);
+        _editor!.Sheet.RemoveCol(Sheet!.Selection.ActiveRegion.Left);
     }
 
     private CellFormat GreenBg = new CellFormat() { BackgroundColor = "var(--cell-highlight-bg-color)" };
+
+    private void HandleNumberInput(ChangeEventArgs e)
+    {
+        // Retrieve the updated value from the event arguments
+        if (int.TryParse(e.Value.ToString(), out int newValue))
+        {
+            if (newValue < peopleMin)
+            {
+                newValue = peopleMin;
+            }
+            else if (newValue > peopleMax)
+            {
+                newValue = peopleMax;
+            }
+
+            myNumber = newValue;
+
+            while (_editor!.Sheet.NumRows > myNumber)
+            {
+                _editor!.Sheet.RemoveRow(_editor!.Sheet.NumRows - 1);
+            }
+            while (_editor!.Sheet.NumRows < myNumber)
+            {
+                int LastRows = _editor!.Sheet.NumRows;
+                _editor!.Sheet.InsertRowAfter(LastRows);
+                // LastRows++;
+                // _editor!.Sheet.TrySetCellValue(LastRows, 1, "hi");
+            }
+        }
+    }
+
 
     protected override void OnInitialized()
     {
@@ -81,22 +116,14 @@
         var random = new Random();
 
         var firstNames = new List<string>() { "Myah", "Jaeden", "Evelin", "Riya", "Isiah", "Alannah", "Mohamed", "Gavyn", "Leo", "Carley", "Sloane" };
-        var lastNames = new List<string>() { "Walters", "Hall", "Smith", "Parker", "Velasquez", "Mccall", "Farmer", "Boone", "Fitzpatrick", "Mcclain", "Mccoy", "Baker" };
-        var cats = new List<string>() { "Manager", "Employee" };
 
-        var lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ac ultricies nisi. Sed tincidunt nunc ac tellus ullamcorper faucibus. In feugiat felis urna, in lacinia erat aliquet eget. Curabitur bibendum varius facilisis. Etiam vel urna sagittis, pellentesque neque eu, bibendum ante. Phasellus sodales facilisis massa sollicitudin rutrum. Vivamus elementum non sapien eget placerat. Etiam ultricies, turpis in fringilla interdum, nulla nulla varius urna, et dapibus lectus mi sit amet urna. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur dapibus a dolor non elementum. Aliquam nec nulla ante.\r\nPellentesque cursus enim massa, sit amet dictum ante luctus eget. Pellentesque quis ultricies lectus, id elementum purus. Nulla sit amet leo tincidunt, facilisis lectus non, sodales mauris. Duis ultricies ornare mi nec sagittis. Vestibulum fermentum orci urna, a interdum mauris laoreet eu. Donec luctus pellentesque tortor ac faucibus. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Curabitur maximus diam tellus, sed porttitor sem fringilla ac. Nunc semper tellus sit amet velit gravida interdum.";
+        this.myNumber = 100;
 
-        for (int i = 0; i < 1000; i++)
+        for (int i = 0; i < myNumber; i++)
         {
             People.Add(new Person()
                 {
-                    Id = i,
-                    Age = random.Next(100).ToString(),
                     FirstName = firstNames[random.Next(0, firstNames.Count)],
-                    LastName = lastNames[random.Next(0, lastNames.Count)],
-                    Category = cats[random.Next(0, cats.Count)],
-                    IsFriendly = false,
-                    Information = i % 2 == 0 ? lorem : ""
                 });
         }
 
@@ -106,26 +133,7 @@
 
         var builder1 = new ObjectEditorBuilder<Person>(People, GridDirection.PropertiesAcrossColumns);
         builder1.AutogenerateProperties(false)
-            .WithExpressionFormat(x => x.IsFriendly, x => GreenBg)
-            .WithProperty(x => x.Id, pd => { pd.Heading = "Person ID"; })
-            .WithProperty(x => x.FirstName, pd => { pd.Heading = "First Name"; })
-            .WithProperty(x => x.LastName, pd => { pd.Heading = "Last Name"; })
-            .WithProperty(x => x.Age, pd =>
-            {
-                pd.ApplyConditionalFormat(ageCf);
-                pd.UseDataValidator(new NumberValidator(true));
-            })
-            .WithProperty(x => x.Category, pd =>
-            {
-                pd.Heading = "Category";
-                pd.Type = "select";
-                pd.UseDataValidator(new SourceValidator(new List<string>() { "", "Manager", "Employee" }, true));
-            })
-            .WithProperty(x => x.IsFriendly, pd => { pd.Heading = "Is Friendly?"; })
-            .WithProperty(x => x.Information, pd =>
-            {
-                pd.Type = "textarea";
-            });
+            .WithProperty(x => x.FirstName, pd => { pd.Heading = "First Name"; });
 
         _editor = builder1.Build();
 
