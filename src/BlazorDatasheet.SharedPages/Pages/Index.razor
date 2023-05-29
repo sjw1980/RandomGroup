@@ -8,25 +8,56 @@
 @using Microsoft.JSInterop;
 @inject IJSRuntime JSRuntime
 
+
 <PageTitle>Random Group</PageTitle>
 
-<div>
-    <button @onclick="InsertRowAfterSelection">Insert row after selection</button>
-    <button @onclick="InsertColAfterSelection">Insert col after selection</button>
-    <button @onclick="RemoveCol">RemoveCol</button>
-    <button @onclick="() => Sheet!.Commands.Undo()">Undo</button>
-    <button @onclick="() => Sheet!.Commands.Redo()">Redo</button>
+
+<div class="card border-primary mb-3">
+    <div class="card-header bg-primary text-white">사람별 특성 추가</div>
+    <div class="card-body">
+        <div class="form-group row">
+            <label for="textbox-input" class="col-sm-2 col-form-label">특성 이름:</label>
+            <div class="col-sm-3">
+                <input id="textbox-input" type="text" @bind="@newColumn" @oninput="HandleAttributeInput" class="form-control" />
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsButtonDisabled">추가</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="textbox-input" class="form-label">Text Input:</label>
-    <input id="textbox-input" type="text" class="form-control" />
+
+<div class="card border-primary mb-3">
+    <div class="card-header bg-primary text-white">랜덤 조 구성을 위한 설정</div>
+    <div class="card-body">
+        <div class="form-group row">
+            <label for="number-input" class="col-sm-3 col-form-label">총 사람수</label>
+            <div class="col-sm-6">
+                <input type="number" @bind="PeopleNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="number-input" class="col-sm-3 col-form-label">총 그룹수</label>
+            <div class="col-sm-6">
+                <input type="number" @bind="GroupNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="form-group">
-    <label for="number-input" class="form-label">Number of Users:</label>
-    <input type="number" @bind="myNumber" class="form-control" @oninput="HandleNumberInput" @ref="numberInput" min="2" max="500" />
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" @onclick="HideToast">
+        <div class="toast-header">
+            <strong class="me-auto">Notice</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+            @ToastMessage
+        </div>
+    </div>
 </div>
+
 
 <div class="form-group">
     <Datasheet Theme="@Theme"
@@ -36,6 +67,7 @@
     </Datasheet>
 </div>
 
+
 @code {
 
     private Sheet? Sheet = null;
@@ -43,28 +75,81 @@
     private ObjectEditor<Person> ?_editor;
     private string Theme => IsDarkMode ? "dark" : "default";
     private bool IsDarkMode { get; set; }
-    private int myNumber { get; set; }
-    private ElementReference numberInput;
+    private bool IsButtonDisabled = true;
+    private bool IsButtonHovered = false;
+
+    private int PeopleNumber { get; set; } = 12;
+    private int GroupNumber { get; set; } = 4;
     private int peopleMin = 2;
     private int peopleMax = 500;
+    private string newColumn = "";
+
+    private string ToastMessage { get; set; } = "";
+    private bool ShowToast { get; set; } = false;
 
 
-    private void InsertRowAfterSelection()
+    private async Task ShowToastNotification(string message)
     {
-        if (Sheet!.Selection.ActiveRegion == null)
+        ToastMessage = message;
+        ShowToast = true;
+        StateHasChanged();
+
+        await JSRuntime.InvokeVoidAsync("showToast"); // Call JavaScript function to show the toast
+    }
+
+    private async Task HideToast()
+    {
+        ShowToast = false;
+        StateHasChanged();
+
+        await JSRuntime.InvokeVoidAsync("hideToast"); // Call JavaScript function to hide the toast
+    }
+
+
+    private void HandleInputChange(ChangeEventArgs e)
+    {
+        newColumn = e.Value.ToString();
+        IsButtonDisabled = string.IsNullOrWhiteSpace(newColumn);
+    }
+
+    private void HandleMouseOver()
+    {
+        if (IsButtonDisabled)
         {
+            IsButtonHovered = true;
+        }
+    }
+
+    private void HandleMouseOut()
+    {
+        if (IsButtonDisabled)
+        {
+            IsButtonHovered = false;
+        }
+    }
+
+    private async Task AddColumn()
+    {
+        if (newColumn == "결과")
+        {
+            newColumn = "";
+            IsButtonDisabled = true;
+            // await ShowToastNotification("[결과]를 사용할 수 없습니다.");
             return;
         }
-        _editor!.InsertAt(new Person(), Sheet.Selection.ActiveRegion.TopLeft.Row);
+        if (newColumn != "")
+        {
+            _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
+            _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = newColumn;
+            newColumn = "";
+            IsButtonDisabled = true;
+        }
     }
 
     private void InsertColAfterSelection()
     {
-        if (Sheet!.Selection.ActiveRegion == null)
-        {
-            return;
-        }
-        _editor!.Sheet.InsertColAfter(Sheet.Selection.ActiveRegion.Left);
+        _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
+        _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = _editor!.Sheet.ColumnHeadings.Count.ToString();
     }
 
     private void RemoveCol()
@@ -77,6 +162,11 @@
     }
 
     private CellFormat GreenBg = new CellFormat() { BackgroundColor = "var(--cell-highlight-bg-color)" };
+
+    private void HandleAttributeInput(ChangeEventArgs e)
+    {
+        IsButtonDisabled = (e.Value.ToString() == "");
+    }
 
     private void HandleNumberInput(ChangeEventArgs e)
     {
@@ -92,18 +182,18 @@
                 newValue = peopleMax;
             }
 
-            myNumber = newValue;
+            PeopleNumber = newValue;
 
-            while (_editor!.Sheet.NumRows > myNumber)
+            while (_editor!.Sheet.NumRows > PeopleNumber)
             {
                 _editor!.Sheet.RemoveRow(_editor!.Sheet.NumRows - 1);
             }
-            while (_editor!.Sheet.NumRows < myNumber)
+            while (_editor!.Sheet.NumRows < PeopleNumber)
             {
-                int LastRows = _editor!.Sheet.NumRows;
+                int LastRows = _editor!.Sheet.NumRows - 1;
                 _editor!.Sheet.InsertRowAfter(LastRows);
-                // LastRows++;
-                // _editor!.Sheet.TrySetCellValue(LastRows, 1, "hi");
+                LastRows++;
+                _editor!.Sheet.TrySetCellValue(LastRows, 0, LastRows.ToString());
             }
         }
     }
@@ -115,15 +205,41 @@
 
         var random = new Random();
 
-        var firstNames = new List<string>() { "Myah", "Jaeden", "Evelin", "Riya", "Isiah", "Alannah", "Mohamed", "Gavyn", "Leo", "Carley", "Sloane" };
+        var firstNames = new List<string>() {
+            "지우",
+            "서연",
+            "하윤",
+            "서현",
+            "윤서",
+            "민서",
+            "민준",
+            "지훈",
+            "현우",
+            "주원",
+            "예준",
+            "도윤"};
 
-        this.myNumber = 100;
+        var genders = new List<string>() {
+            "남자",
+            "모름",
+            "여자"};
 
-        for (int i = 0; i < myNumber; i++)
+        var departments = new List<string>() {
+            "공대",
+            "문과대",
+            "법대",
+            "체대",
+            "미대",
+            "상경대"};
+
+
+        for (int i = 1; i <= PeopleNumber; i++)
         {
             People.Add(new Person()
                 {
                     FirstName = firstNames[random.Next(0, firstNames.Count)],
+                    Gender = genders[random.Next(0, genders.Count)],
+                    Department = departments[random.Next(0, departments.Count)],
                 });
         }
 
@@ -133,7 +249,9 @@
 
         var builder1 = new ObjectEditorBuilder<Person>(People, GridDirection.PropertiesAcrossColumns);
         builder1.AutogenerateProperties(false)
-            .WithProperty(x => x.FirstName, pd => { pd.Heading = "First Name"; });
+            .WithProperty(x => x.FirstName, pd => { pd.Heading = "이름"; })
+            .WithProperty(x => x.Gender, pd => { pd.Heading = "성별"; })
+            .WithProperty(x => x.Department, pd => { pd.Heading = "학과"; });
 
         _editor = builder1.Build();
 
