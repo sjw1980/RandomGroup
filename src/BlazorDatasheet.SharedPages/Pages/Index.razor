@@ -10,40 +10,48 @@
 
 <PageTitle>Random Group</PageTitle>
 
-
-<div class="card border-primary mb-3">
-    <div class="card-header bg-primary text-white">사람별 특성 추가</div>
-    <div class="card-body">
-        <div class="form-group row">
-            <label for="textbox-input" class="col-sm-2 col-form-label">특성 이름:</label>
-            <div class="col-sm-3">
-                <input id="textbox-input" type="text" @bind="@newColumn" @oninput="HandleAttributeInput" class="form-control" />
+<div class="row">
+    <div class="col-md-6">
+        <div class="card border-primary mb-3">
+            <div class="card-header bg-primary text-white">랜덤 조 구성을 위한 설정</div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="number-input" class="col-sm-3 col-form-label">총 사람수</label>
+                    <div class="col-sm-6">
+                        <input type="number" @bind="PeopleNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <label for="number-input" class="col-sm-3 col-form-label">총 그룹수</label>
+                    <div class="col-sm-6">
+                        <input type="number" @bind="GroupNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
+                    </div>
+                </div>
             </div>
-            <div class="col-sm-2">
-                <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsButtonDisabled">추가</button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-primary mb-3">
+            <div class="card-header bg-primary text-white">사람별 특성 추가</div>
+            <div class="card-body">
+                <div class="form-group row">
+                    <label for="textbox-input" class="col-sm-3 col-form-label">특성 이름:</label>
+                    <div class="col-sm-3">
+                        <input id="textbox-input" type="text" @bind="@newColumn" @oninput="HandleAttributeInput" class="form-control" />
+                    </div>
+                    <div class="col-sm-2">
+                        <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsButtonDisabled">추가</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
 
-<div class="card border-primary mb-3">
-    <div class="card-header bg-primary text-white">랜덤 조 구성을 위한 설정</div>
-    <div class="card-body">
-        <div class="form-group row">
-            <label for="number-input" class="col-sm-3 col-form-label">총 사람수</label>
-            <div class="col-sm-6">
-                <input type="number" @bind="PeopleNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="number-input" class="col-sm-3 col-form-label">총 그룹수</label>
-            <div class="col-sm-6">
-                <input type="number" @bind="GroupNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
-            </div>
-        </div>
-    </div>
-</div>
+
+
+
 
 <div class="toast-container position-fixed top-0 end-0 p-3">
     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" @onclick="HideToast">
