@@ -7,6 +7,8 @@ public class Person
     public string? LastName { get; set; }
     public string? Category { get; set; }
     public string? Age { get; set; }
+    public string? Gender { get; set; }
+    public string? Department { get; set; }
     public bool IsFriendly { get; set; }
     public DateTime StartDate { get; set; } = DateTime.Now;
 

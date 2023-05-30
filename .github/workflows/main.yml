@@ -2,7 +2,7 @@ name: Deploy to github pages
 
 on:
   push:
-    branches: [ignored_all]
+    branches: [ignore-all]
 
 jobs:
   deploy-to-github-pages:
