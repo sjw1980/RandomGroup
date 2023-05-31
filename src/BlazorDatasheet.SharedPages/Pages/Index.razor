@@ -16,14 +16,14 @@
             <div class="card-header bg-primary text-white">랜덤 조 구성을 위한 설정</div>
             <div class="card-body">
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-3 col-form-label">총 사람수</label>
-                    <div class="col-sm-6">
+                    <label for="number-input" class="col-sm-4 col-form-label">총 사람수</label>
+                    <div class="col-sm-8">
                         <input type="number" @bind="PeopleNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-3 col-form-label">총 그룹수</label>
-                    <div class="col-sm-6">
+                    <label for="number-input" class="col-sm-4 col-form-label">총 그룹수</label>
+                    <div class="col-sm-8">
                         <input type="number" @bind="GroupNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
                     </div>
                 </div>
@@ -31,21 +31,34 @@
         </div>
     </div>
     <div class="col-md-6">
-        <div class="card border-primary mb-3">
-            <div class="card-header bg-primary text-white">사람별 특성 추가</div>
+        <div class="card border-primary mb-4">
+            <div class="card-header bg-primary text-white">사람별 특성 추가/삭제 및 결과</div>
             <div class="card-body">
                 <div class="form-group row">
-                    <label for="textbox-input" class="col-sm-3 col-form-label">특성 이름:</label>
-                    <div class="col-sm-3">
+                    <label for="textbox-input" class="col-sm-3 col-form-label">특성 이름</label>
+                    <div class="col-sm-6">
                         <input id="textbox-input" type="text" @bind="@newColumn" @oninput="HandleAttributeInput" class="form-control" />
                     </div>
-                    <div class="col-sm-2">
-                        <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsButtonDisabled">추가</button>
+                    <div class="col-sm-3">
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsAddDisabled">추가</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-sm-6">
+                        <button class="btn btn-primary" @onclick="DoRandom">랜덤 그룹 결과</button>                        
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex justify-content-end">
+                            <button class="btn btn-primary btn-block" @onclick="DeleteColumn">삭제</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
 </div>
 
 
@@ -68,7 +81,7 @@
 
 <div class="form-group">
     <Datasheet Theme="@Theme"
-               Sheet="Sheet"
+               Sheet="sheet"
                StickyHeadings="true"
                IsFixedHeight="false">
     </Datasheet>
@@ -77,13 +90,12 @@
 
 @code {
 
-    private Sheet? Sheet = null;
+    private Sheet? sheet = null;
     private List<Person> ?People { get; set; }
     private ObjectEditor<Person> ?_editor;
     private string Theme => IsDarkMode ? "dark" : "default";
     private bool IsDarkMode { get; set; }
-    private bool IsButtonDisabled = true;
-    private bool IsButtonHovered = false;
+    private bool IsAddDisabled = true;
 
     private int PeopleNumber { get; set; } = 12;
     private int GroupNumber { get; set; } = 4;
@@ -94,6 +106,8 @@
     private string ToastMessage { get; set; } = "";
     private bool ShowToast { get; set; } = false;
 
+    private string selectedColumn { get; set; } = "";
+
 
     private async Task ShowToastNotification(string message)
     {
@@ -102,6 +116,12 @@
         StateHasChanged();
 
         await JSRuntime.InvokeVoidAsync("showToast"); // Call JavaScript function to show the toast
+    }
+
+    private void HandleSelectedColumnChanged(int selectedColumn)
+    {
+        // Do something with the selected column index
+        Console.WriteLine($"Selected column index: {selectedColumn}");
     }
 
     private async Task HideToast()
@@ -116,31 +136,29 @@
     private void HandleInputChange(ChangeEventArgs e)
     {
         newColumn = e.Value.ToString();
-        IsButtonDisabled = string.IsNullOrWhiteSpace(newColumn);
+        IsAddDisabled = string.IsNullOrWhiteSpace(newColumn);
     }
 
-    private void HandleMouseOver()
+    private void DeleteColumn()
     {
-        if (IsButtonDisabled)
+        if (sheet!.Selection.ActiveRegion == null)
         {
-            IsButtonHovered = true;
+            return;
         }
+        _editor!.Sheet.RemoveCol(sheet.Selection.ActiveRegion.Left);
     }
 
-    private void HandleMouseOut()
+    private void DoRandom()
     {
-        if (IsButtonDisabled)
-        {
-            IsButtonHovered = false;
-        }
+        
     }
 
-    private async Task AddColumn()
+    private void AddColumn()
     {
         if (newColumn == "결과")
         {
             newColumn = "";
-            IsButtonDisabled = true;
+            IsAddDisabled = true;
             // await ShowToastNotification("[결과]를 사용할 수 없습니다.");
             return;
         }
@@ -149,7 +167,7 @@
             _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
             _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = newColumn;
             newColumn = "";
-            IsButtonDisabled = true;
+            IsAddDisabled = true;
         }
     }
 
@@ -161,18 +179,18 @@
 
     private void RemoveCol()
     {
-        if (Sheet!.Selection.ActiveRegion == null)
+        if (sheet!.Selection.ActiveRegion == null)
         {
             return;
         }
-        _editor!.Sheet.RemoveCol(Sheet!.Selection.ActiveRegion.Left);
+        _editor!.Sheet.RemoveCol(sheet!.Selection.ActiveRegion.Left);
     }
 
     private CellFormat GreenBg = new CellFormat() { BackgroundColor = "var(--cell-highlight-bg-color)" };
 
     private void HandleAttributeInput(ChangeEventArgs e)
     {
-        IsButtonDisabled = (e.Value.ToString() == "");
+        IsAddDisabled = (e.Value.ToString() == "");
     }
 
     private void HandleNumberInput(ChangeEventArgs e)
@@ -205,6 +223,12 @@
         }
     }
 
+    // Define the event handler method
+    private void CellChanged(object? sender, IEnumerable<ChangeEventArgs> e)
+    {
+        // Handle the CellsChanged event
+        // ...
+    }
 
     protected override void OnInitialized()
     {
@@ -262,7 +286,7 @@
 
         _editor = builder1.Build();
 
-        Sheet = _editor.Sheet;
+        sheet = _editor.Sheet;
     }
 
 }
