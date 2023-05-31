@@ -5,6 +5,7 @@ A simple datasheet component for editing tabular data.
 ![image](https://user-images.githubusercontent.com/34253568/197425287-690a747a-24f5-4e0d-afcf-e2a09efbaba2.png)
 
 #### Features
+
 - Data editing
   - Built in editors including text, date, select, boolean, texarea, enum
   - Add custom editors for any data type
@@ -15,10 +16,9 @@ A simple datasheet component for editing tabular data.
 - Copy and paste from tabulated data
 - Virtualization via Blazor Virtualization - handles many cells at once.
 
-Demo: https://anmcgrath.github.io/BlazorDatasheet/
+Demo: https://sjw1980.github.io/RandomGroup/
 
 ### Getting Started
-
 
 Blazor Datasheet provides a **Datasheet** Blazor component that accepts a Sheet.
 
