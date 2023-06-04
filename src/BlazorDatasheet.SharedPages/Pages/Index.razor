@@ -89,7 +89,6 @@
 
 
 @code {
-
     private Sheet? sheet = null;
     private List<Person> ?People { get; set; }
     private ObjectEditor<Person> ?_editor;
@@ -150,22 +149,35 @@
 
     private void DoRandom()
     {
-        
+        if (_editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header != Define.Result)
+        {
+            _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
+            _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = Define.Result;
+        }
     }
 
     private void AddColumn()
     {
-        if (newColumn == "결과")
+        if (newColumn == Define.Result)
         {
             newColumn = "";
             IsAddDisabled = true;
             // await ShowToastNotification("[결과]를 사용할 수 없습니다.");
             return;
         }
-        if (newColumn != "")
+        else if (newColumn != "")
         {
-            _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
-            _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = newColumn;
+            int InsertCol;
+            if (_editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header == Define.Result)
+            {
+                InsertCol = _editor!.Sheet.NumCols - 2;
+            }
+            else
+            {
+                InsertCol = _editor!.Sheet.NumCols - 1;
+            }
+            _editor!.Sheet.InsertColAfter(InsertCol);
+            _editor!.Sheet.ColumnHeadings[InsertCol+1].Header = newColumn;
             newColumn = "";
             IsAddDisabled = true;
         }
