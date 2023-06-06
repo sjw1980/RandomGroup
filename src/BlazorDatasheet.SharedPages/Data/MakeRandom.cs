@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using static BlazorDatasheet.SharedPages.Data.Define;
 using static BlazorDatasheet.SharedPages.Data.Log;
 
 namespace BlazorDatasheet.SharedPages.Data
@@ -27,7 +29,7 @@ namespace BlazorDatasheet.SharedPages.Data
             return (userIndex, value);
         }
 
-        public static string[,] MemberRawInfo = SampleRawInfo.Data;
+        public static string[][] MemberRawInfo = SampleRawInfo.Data;
 
         public static dynamic objResult = new ExpandoObject();
         public static string errorDetail = "";
@@ -39,7 +41,7 @@ namespace BlazorDatasheet.SharedPages.Data
         public static Dictionary<string, string> MemberIdToLineNumber = new Dictionary<string, string>();
 
         public static List<string[]> MemberInfo = new List<string[]>();
-        public static int[] ErrorCount = new int[TotalAttribute];
+        public static int[] ErrorCount;
 
         public static int MemberLength;
         public static List<int> MemberList = new List<int>();
@@ -70,7 +72,9 @@ namespace BlazorDatasheet.SharedPages.Data
             FitGroup = 0;
 
             objResult = new ExpandoObject();
-            TotalAttribute = MemberRawInfo.Length;
+            TotalAttribute = MemberRawInfo[1].Length;
+            ErrorCount = new int[TotalAttribute];
+
             MemberRawLength = MemberRawInfo.Length - ColumnNameRow - 1;
             LackGroups = 0;
 
@@ -93,9 +97,9 @@ namespace BlazorDatasheet.SharedPages.Data
                 Console.WriteLine("Total Raw Member: " + MemberRawLength);
             }
 
-            for (int MemberIndex = 2; MemberIndex < MemberRawInfo.Length; MemberIndex++)
+            for (int MemberIndex = 4; MemberIndex < MemberRawInfo.Length; MemberIndex++)
             {
-                MemberIdToLineNumber[MemberRawInfo[MemberIndex, IndexID_Column]] = MemberIndex.ToString();
+                MemberIdToLineNumber[MemberRawInfo[MemberIndex][IndexID_Column]] = MemberIndex.ToString();
 
                 bool isMemberPush = false;
                 if (ManualIndex == Constants.NO_EXIST_COLUMN)
@@ -104,7 +108,7 @@ namespace BlazorDatasheet.SharedPages.Data
                 }
                 else
                 {
-                    if (MemberRawInfo[MemberIndex, ManualIndex] == "")
+                    if (MemberRawInfo[MemberIndex][ManualIndex] == "")
                     {
                         isMemberPush = true;
                     }
@@ -115,7 +119,7 @@ namespace BlazorDatasheet.SharedPages.Data
                     string[] values = new string[TotalAttribute];
                     for (int Index = 0; Index < TotalAttribute; Index++)
                     {
-                        values[Index] = MemberRawInfo[MemberIndex, Index];
+                        values[Index] = MemberRawInfo[MemberIndex][Index];
                     }
                     MemberInfo.Add(values);
                 }
@@ -190,19 +194,25 @@ namespace BlazorDatasheet.SharedPages.Data
 
         }
 
-        private void CheckAttributes()
+        private static void CheckAttributes()
         {
             for (int AttributeIndex = 0; AttributeIndex < TotalAttribute; AttributeIndex++)
             {
                 ErrorCount[AttributeIndex] = 0;
-                if (MemberRawInfo[IndexID_Column, AttributeIndex] == "")
+                try
                 {
+                    if (MemberRawInfo[IndexID_Column][AttributeIndex] == "")
+                    {
+                        continue;
+                    }
+                }
+                catch {
                     continue;
                 }
 
                 if (Config.Attribute)
                 {
-                    Console.WriteLine("Attribute - {0}th, {1}", AttributeIndex, MemberRawInfo[ColumnNameRow, AttributeIndex]);
+                    Console.WriteLine("Attribute - {0}th, {1}", AttributeIndex, MemberRawInfo[ColumnNameRow][AttributeIndex]);
                 }
 
                 var One = new Dictionary<string, int>();
@@ -288,7 +298,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        private void ShowReport()
+        public static void ShowReport()
         {
             AllGroup.Sort((a, b) => a.Index - b.Index);
             var ResultMap = new Dictionary<string, string>();
@@ -324,7 +334,7 @@ namespace BlazorDatasheet.SharedPages.Data
                         debug += "  ㄴ ";
                         for (int Index = 0; Index < TotalAttribute; Index++)
                         {
-                            debug += MemberRawInfo[int.Parse(MemberIdToLineNumber[memberID]), Index] + ", ";
+                            debug += MemberRawInfo[int.Parse(MemberIdToLineNumber[memberID])][Index] + ", ";
                         }
                         debug += "\n";
                     }
@@ -389,7 +399,7 @@ namespace BlazorDatasheet.SharedPages.Data
                     string sIndex = "";
                     try
                     {
-                        sIndex = MemberRawInfo[Index + ColumnNameRow + 1, 0]; // index
+                        sIndex = MemberRawInfo[Index + ColumnNameRow + 1][0]; // index
                     }
                     catch
                     {
@@ -416,7 +426,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        void EndedUp()
+        public static void EndedUp()
         {
             if (Config.EndUpSummary)
             {
@@ -425,7 +435,7 @@ namespace BlazorDatasheet.SharedPages.Data
 
                 foreach (var attribute in ImportantAttribute)
                 {
-                    Console.WriteLine(MemberRawInfo[1, attribute.Key] + "'s Error Count: " + ErrorCount[attribute.Key]);
+                    Console.WriteLine(MemberRawInfo[1][attribute.Key] + "'s Error Count: " + ErrorCount[attribute.Key]);
                 }
 
                 Console.WriteLine("Fit groups " + FitGroup);
@@ -440,7 +450,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        void AssignMemberToGroups()
+        public static void AssignMemberToGroups()
         {
             if (Config.AllMember)
             {
@@ -489,14 +499,14 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        int GetErrorLevel(Group aGroup, string[] targetMember)
+        public static int GetErrorLevel(Group aGroup, string[] targetMember)
         {
             double ReturnValue = 0;
 
             // Attribute Check
             for (int Index = 0; Index < TotalAttribute; Index++)
             {
-                if (MemberRawInfo[0, Index] == "")
+                if (MemberRawInfo[0][Index] == "")
                 {
                     continue;
                 }
@@ -542,7 +552,7 @@ namespace BlazorDatasheet.SharedPages.Data
             return (int)ReturnValue;
         }
 
-        void AssignMemberWithFamily()
+        public static void AssignMemberWithFamily()
         {
             if (MorePeopleIndex != Constants.NO_EXIST_COLUMN)
             {
@@ -565,7 +575,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        void AddMember(Group one, string[] targetMember)
+        public static void AddMember(Group one, string[] targetMember)
         {
             bool AddMore = false;
 
@@ -590,7 +600,7 @@ namespace BlazorDatasheet.SharedPages.Data
 
             for (int Index = 0; Index < TotalAttribute; Index++)
             {
-                if (MemberRawInfo[0, Index] == "")
+                if (MemberRawInfo[0][Index] == "")
                 {
                     continue;
                 }
@@ -615,7 +625,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        public void ShowTotalGroupSummary()
+        public static void ShowTotalGroupSummary()
         {
             TotalGroupLength = (int)Math.Ceiling((MemberLength + TotalFamilyMembers) / (double)MaximumInGroup);
 
@@ -667,7 +677,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        public void ProcessImportantList()
+        public static void ProcessImportantList()
         {
             ImportantAttribute = new Dictionary<int, double>(ImportantAttribute.OrderByDescending(x => x.Value));
 
@@ -694,7 +704,7 @@ namespace BlazorDatasheet.SharedPages.Data
                 value += SmallDiff--;
                 if (Config.Weights)
                 {
-                    Console.WriteLine(MemberRawInfo[1, entry.Key] + " - " + value);
+                    Console.WriteLine(MemberRawInfo[1][entry.Key] + " - " + value);
                 }
                 ImportantAttribute[entry.Key] = value;
             }
@@ -705,7 +715,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
             foreach (var entry in ImportantAttribute)
             {
-                double value = entry.Value * (int)Math.Pow(10, int.Parse(MemberRawInfo[0, entry.Key]));
+                double value = entry.Value * (int)Math.Pow(10, int.Parse(MemberRawInfo[0][entry.Key]));
                 ImportantAttribute[entry.Key] = value;
             }
 
@@ -714,17 +724,17 @@ namespace BlazorDatasheet.SharedPages.Data
             {
                 foreach (var entry in ImportantAttribute)
                 {
-                    Console.WriteLine(MemberRawInfo[1, entry.Key] + " - " + entry.Value);
+                    Console.WriteLine(MemberRawInfo[1][entry.Key] + " - " + entry.Value);
                 }
             }
         }
 
-        public string KeyMaker(int index, string v)
+        public static string KeyMaker(int index, string v)
         {
             return index.ToString() + " " + v;
         }
 
-        public double CalculateStandardDeviation(double[] arr)
+        public static double CalculateStandardDeviation(double[] arr)
         {
             // Creating the mean with Array.Sum
             double mean = arr.Sum() / arr.Length;
@@ -744,7 +754,7 @@ namespace BlazorDatasheet.SharedPages.Data
             return standardDeviation * arr.Length;
         }
 
-        public object GetResult(string[][] sourceData)
+        public static object GetResult(string[][] sourceData)
         {
             object returnValue;
             errorDetail = "";
@@ -762,10 +772,10 @@ namespace BlazorDatasheet.SharedPages.Data
                     return Define.HttpStatusCodes.HTTP_VERSION_NOT_SUPPORTED;
                 }
                 MaximumInGroup = Convert.ToInt32(sourceData[0][1]);
-                DateGroupRankNumber = Convert.ToInt32(sourceData[0][4]);
+                DateGroupRankNumber = Convert.ToInt32(sourceData[0][2]);
 
                 ManualIndex = Constants.NO_EXIST_COLUMN;
-                MorePeopleIndex = Constants.NO_EXIST_COLUMN;
+                MorePeopleIndex = Constants.NO_EXIST_COLUMN;    
                 DateGroupIndex = Constants.NO_EXIST_COLUMN;
 
                 int AbsentCount = 0;
@@ -782,9 +792,14 @@ namespace BlazorDatasheet.SharedPages.Data
                         Console.WriteLine(Index.ToString() + " " + sourceData[1][Index].ToString());
                     }
 
-                    switch (int.Parse(sourceData[1][Index]))
+                    string Type = sourceData[1][Index];
+
+                    ColumnTypes columnType = (ColumnTypes)Enum.Parse(typeof(ColumnTypes), Type);
+
+
+                    switch (columnType)
                     {
-                        case (int)Define.ColumnTypes.ABSENT:
+                        case Define.ColumnTypes.ABSENT:
                             if (AbsentCount != 0)
                             {
                                 errorDetail = "ABSENT must be once";
@@ -793,7 +808,7 @@ namespace BlazorDatasheet.SharedPages.Data
                             ManualIndex = Index;
                             AbsentCount++;
                             break;
-                        case (int)Define.ColumnTypes.DATE:
+                        case Define.ColumnTypes.DATE:
                             if (DateCount != 0)
                             {
                                 errorDetail = "DATE must be once";
@@ -802,7 +817,7 @@ namespace BlazorDatasheet.SharedPages.Data
                             DateGroupIndex = Index;
                             DateCount++;
                             break;
-                        case (int)Define.ColumnTypes.INDEX:
+                        case Define.ColumnTypes.INDEX:
                             if (IndexCount != 0)
                             {
                                 errorDetail = "INDEX must be once";
@@ -811,7 +826,7 @@ namespace BlazorDatasheet.SharedPages.Data
                             }
                             IndexCount++;
                             break;
-                        case (int)Define.ColumnTypes.NAME:
+                        case Define.ColumnTypes.NAME:
                             if (NameCount != 0)
                             {
                                 errorDetail = "NAME must be once";
@@ -819,10 +834,10 @@ namespace BlazorDatasheet.SharedPages.Data
                             }
                             NameCount++;
                             break;
-                        case (int)Define.ColumnTypes.NUMBER:
+                        case Define.ColumnTypes.NUMBER:
                             NumberCount++;
                             break;
-                        case (int)Define.ColumnTypes.PAIR:
+                        case Define.ColumnTypes.PAIR:
                             if (PiarCount != 0)
                             {
                                 errorDetail = "PAIR must be once";
@@ -831,7 +846,7 @@ namespace BlazorDatasheet.SharedPages.Data
                             MorePeopleIndex = Index;
                             PiarCount++;
                             break;
-                        case (int)Define.ColumnTypes.TEXT:
+                        case Define.ColumnTypes.TEXT:
                             TextCount++;
                             break;
                         default:
