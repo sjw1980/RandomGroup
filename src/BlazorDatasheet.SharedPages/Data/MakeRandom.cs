@@ -72,7 +72,7 @@ namespace BlazorDatasheet.SharedPages.Data
             FitGroup = 0;
 
             objResult = new ExpandoObject();
-            TotalAttribute = MemberRawInfo[1].Length;
+            TotalAttribute = MemberRawInfo[Define.AttritubeTypeColumn].Length;
             ErrorCount = new int[TotalAttribute];
 
             MemberRawLength = MemberRawInfo.Length - ColumnNameRow - 1;
@@ -199,20 +199,14 @@ namespace BlazorDatasheet.SharedPages.Data
             for (int AttributeIndex = 0; AttributeIndex < TotalAttribute; AttributeIndex++)
             {
                 ErrorCount[AttributeIndex] = 0;
-                try
+                if (MemberRawInfo[Define.WeightColumn][AttributeIndex] == "")
                 {
-                    if (MemberRawInfo[IndexID_Column][AttributeIndex] == "")
-                    {
-                        continue;
-                    }
-                }
-                catch {
                     continue;
                 }
 
                 if (Config.Attribute)
                 {
-                    Console.WriteLine("Attribute - {0}th, {1}", AttributeIndex, MemberRawInfo[ColumnNameRow][AttributeIndex]);
+                    Console.WriteLine("Attribute - {0}th, {1}", AttributeIndex, MemberRawInfo[Define.NameColumn][AttributeIndex]);
                 }
 
                 var One = new Dictionary<string, int>();
@@ -435,7 +429,7 @@ namespace BlazorDatasheet.SharedPages.Data
 
                 foreach (var attribute in ImportantAttribute)
                 {
-                    Console.WriteLine(MemberRawInfo[1][attribute.Key] + "'s Error Count: " + ErrorCount[attribute.Key]);
+                    Console.WriteLine(MemberRawInfo[Define.NameColumn][attribute.Key] + "'s Error Count: " + ErrorCount[attribute.Key]);
                 }
 
                 Console.WriteLine("Fit groups " + FitGroup);
@@ -506,7 +500,7 @@ namespace BlazorDatasheet.SharedPages.Data
             // Attribute Check
             for (int Index = 0; Index < TotalAttribute; Index++)
             {
-                if (MemberRawInfo[0][Index] == "")
+                if (MemberRawInfo[Define.WeightColumn][Index] == "")
                 {
                     continue;
                 }
@@ -526,9 +520,12 @@ namespace BlazorDatasheet.SharedPages.Data
                 }
                 else
                 {
-                    if (0 != Limits[Key].MinPerson)
+                    if (Limits.ContainsKey(Key))
                     {
-                        ReturnValue -= ImportantAttribute[Index] * 10;
+                        if (0 != Limits[Key].MinPerson)
+                        {
+                            ReturnValue -= ImportantAttribute[Index] * 10;
+                        }
                     }
                     ReturnValue -= ImportantAttribute[Index] * 5;
                 }
@@ -600,7 +597,7 @@ namespace BlazorDatasheet.SharedPages.Data
 
             for (int Index = 0; Index < TotalAttribute; Index++)
             {
-                if (MemberRawInfo[0][Index] == "")
+                if (MemberRawInfo[Define.WeightColumn][Index] == "")
                 {
                     continue;
                 }
@@ -640,7 +637,7 @@ namespace BlazorDatasheet.SharedPages.Data
             {
                 if (Config.PreSummary)
                 {
-                    Console.WriteLine("All group(s) have 8 Members");
+                    Console.WriteLine("All group(s) have {0} Members", MaximumInGroup);
                 }
                 LackGroups = 0;
             }
@@ -649,7 +646,7 @@ namespace BlazorDatasheet.SharedPages.Data
                 LackGroups = MaximumInGroup - LeftMember;
                 if (Config.PreSummary)
                 {
-                    Console.WriteLine(LackGroups + " group(s) have 7 Members");
+                    Console.WriteLine(LackGroups + " group(s) have {0} Members", MaximumInGroup - 1);
                 }
             }
 
@@ -687,7 +684,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
             int SmallDiff = 10;
             int Index = (int)Math.Pow(10, SmallDiff);
-            if (ImportantAttribute.Count > SmallDiff)
+            if (ImportantAttribute.Count > 100)
             {
                 Console.WriteLine("컬럼이 너무 많아요.. 100개까지만...");
                 // process.exit(-1);
@@ -704,7 +701,7 @@ namespace BlazorDatasheet.SharedPages.Data
                 value += SmallDiff--;
                 if (Config.Weights)
                 {
-                    Console.WriteLine(MemberRawInfo[1][entry.Key] + " - " + value);
+                    Console.WriteLine(MemberRawInfo[Define.NameColumn][entry.Key] + " - " + value);
                 }
                 ImportantAttribute[entry.Key] = value;
             }
@@ -715,7 +712,14 @@ namespace BlazorDatasheet.SharedPages.Data
             }
             foreach (var entry in ImportantAttribute)
             {
-                double value = entry.Value * (int)Math.Pow(10, int.Parse(MemberRawInfo[0][entry.Key]));
+                double value;
+                try
+                {
+                    value = entry.Value * (int)Math.Pow(10, int.Parse(MemberRawInfo[Define.NameColumn][entry.Key]));
+                }
+                catch {
+                    value = entry.Value * 1;
+                }
                 ImportantAttribute[entry.Key] = value;
             }
 
@@ -724,14 +728,14 @@ namespace BlazorDatasheet.SharedPages.Data
             {
                 foreach (var entry in ImportantAttribute)
                 {
-                    Console.WriteLine(MemberRawInfo[1][entry.Key] + " - " + entry.Value);
+                    Console.WriteLine(MemberRawInfo[Define.NameColumn][entry.Key] + " - " + entry.Value);
                 }
             }
         }
 
-        public static string KeyMaker(int index, string v)
+        public static string KeyMaker(int index, string valueInRow)
         {
-            return index.ToString() + " " + v;
+            return index.ToString() + " " + valueInRow;
         }
 
         public static double CalculateStandardDeviation(double[] arr)
@@ -758,7 +762,7 @@ namespace BlazorDatasheet.SharedPages.Data
         {
             object returnValue;
             errorDetail = "";
-            // MemberRawInfo = sourceData;
+            MemberRawInfo = sourceData;
 
             if (sourceData[0].Length != Constants.TARGET_COLUMN_COUNT_IN_CONFIG)
             {

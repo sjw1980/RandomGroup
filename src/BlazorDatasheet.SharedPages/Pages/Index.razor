@@ -154,7 +154,42 @@
             _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
             _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = Define.Result;
         }
-        MakeRandom.GetResult(SampleRawInfo.Data);
+
+        List<string[]> Data = new List<string[]>();
+        int DateRank = 4;
+        Data.Add(new string[] { "v1", GroupNumber.ToString(), DateRank.ToString() });
+
+        List<string> Types = new List<string>();
+        List<string> Weights = new List<string>();
+        List<string> AttributeName = new List<string>();
+
+        Types.Add("INDEX");
+        Weights.Add("");
+        AttributeName.Add("No.");
+        for(int col = 0; col < _editor!.Sheet.ColumnHeadings.Count; col++)
+        {
+            Types.Add("TEXT");
+            Weights.Add("1");
+            AttributeName.Add(_editor!.Sheet.ColumnHeadings[col].Header);
+        }
+
+        Data.Add(Types.ToArray());
+        Data.Add(Weights.ToArray());
+        Data.Add(AttributeName.ToArray());
+
+        for (int row = 0; row < _editor!.Sheet.NumRows; row++)
+        {
+            List<string> one = new List<string>();
+            one.Add(row.ToString());
+            for (int col = 0; col < _editor!.Sheet.ColumnHeadings.Count; col++)
+            {
+                one.Add(Convert.ToString(_editor!.Sheet.GetCell(row, col).GetValue()));
+            }
+            Data.Add(one.ToArray());
+        }
+
+        MakeRandom.GetResult(Data.ToArray());
+        //MakeRandom.GetResult(SampleRawInfo.Data);
     }
 
     private void AddColumn()

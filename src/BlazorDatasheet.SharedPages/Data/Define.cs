@@ -16,19 +16,22 @@ namespace BlazorDatasheet.SharedPages.Data
     {
         public static class Config
         {
-            public static bool AllMember { get; set; } = false;
-            public static bool GroupMember { get; set; } = false;
-            public static bool Attribute { get; set; } = false;
-            public static bool Weights { get; set; } = false;
-            public static bool PreSummary { get; set; } = false;
-            public static bool EndUpSummary { get; set; } = false;
-            public static bool ShowForExcelCopy { get; set; } = false;
+            public static bool AllMember { get; set; } = true;
+            public static bool GroupMember { get; set; } = true;
+            public static bool Attribute { get; set; } = true;
+            public static bool Weights { get; set; } = true;
+            public static bool PreSummary { get; set; } = true;
+            public static bool EndUpSummary { get; set; } = true;
+            public static bool ShowForExcelCopy { get; set; } = true;
         }
     }
 
     internal class Define
     {
         internal const string Result = "결과";
+        internal static readonly int AttritubeTypeColumn = 1;
+        internal static readonly int WeightColumn = 2;
+        internal static readonly int NameColumn = 3;
 
         public enum ColumnTypes
         {
@@ -111,7 +114,7 @@ namespace BlazorDatasheet.SharedPages.Data
     {
         public static string[][] Data = new string[][]
         {
-            new string[] { "v1", "8", "4" },
+            new string[] { "v1", "2", "4" },
             new string[] { "INDEX", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "TEXT", "DATE", "ABSENT", "PAIR" },
             new string[] { "", "", "1", "1", "1", "1", "", "", "10", "1", "", "" },
             new string[]
