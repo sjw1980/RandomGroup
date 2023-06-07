@@ -149,11 +149,14 @@
 
     private void DoRandom()
     {
-        if (_editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header != Define.Result)
+        if (_editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header == Define.Result)
         {
-            _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
-            _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = Define.Result;
+            _editor!.Sheet.RemoveCol(_editor!.Sheet.ColumnHeadings.Count - 1);
         }
+        _editor!.Sheet.InsertColAfter(_editor!.Sheet.NumCols - 1);
+        _editor!.Sheet.ColumnHeadings[_editor!.Sheet.ColumnHeadings.Count - 1].Header = Define.Result;
+
+        int ResultColumn = _editor!.Sheet.ColumnHeadings.Count - 1;
 
         List<string[]> Data = new List<string[]>();
         int DateRank = 4;
@@ -166,7 +169,7 @@
         Types.Add("INDEX");
         Weights.Add("");
         AttributeName.Add("No.");
-        for(int col = 0; col < _editor!.Sheet.ColumnHeadings.Count; col++)
+        for (int col = 0; col < ResultColumn; col++)
         {
             Types.Add("TEXT");
             Weights.Add("1");
@@ -181,14 +184,21 @@
         {
             List<string> one = new List<string>();
             one.Add(row.ToString());
-            for (int col = 0; col < _editor!.Sheet.ColumnHeadings.Count; col++)
+            for (int col = 0; col < ResultColumn; col++)
             {
                 one.Add(Convert.ToString(_editor!.Sheet.GetCell(row, col).GetValue()));
             }
             Data.Add(one.ToArray());
         }
 
-        MakeRandom.GetResult(Data.ToArray());
+        if (MakeRandom.GetResult(Data.ToArray()) == Define.HttpStatusCodes.OK)
+        {
+            Dictionary<string, string> ResultValue = MakeRandom.ResultValue;
+            for (int row = 0; row < _editor!.Sheet.NumRows; row++)
+            {
+                _editor!.Sheet.TrySetCellValue(row, ResultColumn, ResultValue[row.ToString()]);
+            }
+        }
         //MakeRandom.GetResult(SampleRawInfo.Data);
     }
 

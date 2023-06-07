@@ -63,6 +63,8 @@ namespace BlazorDatasheet.SharedPages.Data
         public static int OverGroup = 0;
         public static int FitGroup = 0;
 
+        public static Dictionary<string, string> ResultValue = new Dictionary<string, string>();
+
         public static void Init()
         {
             PassGroup = 0;
@@ -90,6 +92,8 @@ namespace BlazorDatasheet.SharedPages.Data
 
             MemberData.Clear();
             ElementsAmount.Clear();
+
+            ResultValue.Clear();
 
             if (Log.Config.PreSummary)
             {
@@ -383,40 +387,40 @@ namespace BlazorDatasheet.SharedPages.Data
                 {
                     Console.WriteLine(debug);
                 }
+            }
 
-                // Console.WriteLine("ResultMap", ResultMap);
-                string sb = "";
-                sb += "아래 부터 복사" + "\r\n";
-                List<(string userIndex, string value)> objResult = new List<(string userIndex, string value)>();
-                for (int Index = 0; Index < MemberRawLength; Index++)
+            // Console.WriteLine("ResultMap", ResultMap);
+            string sb = "";
+            sb += "아래 부터 복사" + "\r\n";
+            List<(string userIndex, string value)> objResult = new List<(string userIndex, string value)>();
+            for (int Index = Define.NameColumn + 1; Index < MemberRawInfo.Length; Index++)
+            {
+                string sIndex = "";
+                try
                 {
-                    string sIndex = "";
-                    try
-                    {
-                        sIndex = MemberRawInfo[Index + ColumnNameRow + 1][0]; // index
-                    }
-                    catch
-                    {
-                        Console.WriteLine("이상해요. 개발자 불러요!");
-                        // Environment.Exit(-1);
-                    }
-                    string value = "";
-                    if (ResultMap.ContainsKey(sIndex))
-                    {
-                        sb += ResultMap[sIndex];
-                        value = ResultMap[sIndex];
-                    }
-                    string UserIndex = sIndex;
-                    objResult.Add(MakeStruct(UserIndex, value));
-
-                    sb += "\r\n";
+                    sIndex = MemberRawInfo[Index][0]; // index
                 }
-                sb += "위줄까지 복사";
-
-                if (Config.ShowForExcelCopy)
+                catch
                 {
-                    Console.WriteLine(sb);
+                    Console.WriteLine("이상해요. 개발자 불러요!");
+                    // Environment.Exit(-1);
                 }
+                string value = "";
+                if (ResultMap.ContainsKey(sIndex))
+                {
+                    sb += ResultMap[sIndex];
+                    value = ResultMap[sIndex];
+                }
+                string UserIndex = sIndex;
+                objResult.Add(MakeStruct(UserIndex, value));
+
+                sb += "\r\n";
+            }
+            sb += "위줄까지 복사";
+
+            if (Config.ShowForExcelCopy)
+            {
+                Console.WriteLine(sb);
             }
         }
 
@@ -487,6 +491,7 @@ namespace BlazorDatasheet.SharedPages.Data
                 targetGroup = sameGroups[new Random().Next(0, sameGroups.Count)];
 
                 AddMember(targetGroup, targetMember);
+                ResultValue[targetMember[IndexID_Column]] = (targetGroup.Index + 1).ToString() + "조";
 
                 int memberIndex = MemberInfo.FindIndex(x => x[0] == targetMember[0]);
                 MemberInfo.RemoveAt(memberIndex);
@@ -758,9 +763,9 @@ namespace BlazorDatasheet.SharedPages.Data
             return standardDeviation * arr.Length;
         }
 
-        public static object GetResult(string[][] sourceData)
+        public static HttpStatusCodes GetResult(string[][] sourceData)
         {
-            object returnValue;
+            HttpStatusCodes returnValue;
             errorDetail = "";
             MemberRawInfo = sourceData;
 
@@ -888,7 +893,6 @@ namespace BlazorDatasheet.SharedPages.Data
             }
 
             return returnValue;
-
         }
     }
 }
