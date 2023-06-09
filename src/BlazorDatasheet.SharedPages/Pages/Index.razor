@@ -13,16 +13,16 @@
 <div class="row">
     <div class="col-md-6">
         <div class="card border-primary mb-3">
-            <div class="card-header bg-primary text-white">·£´ı Á¶ ±¸¼ºÀ» À§ÇÑ ¼³Á¤</div>
+            <div class="card-header bg-primary text-white">ëœë¤ ì¡° êµ¬ì„±ì„ ìœ„í•œ ì„¤ì •</div>
             <div class="card-body">
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-4 col-form-label">ÃÑ »ç¶÷¼ö</label>
+                    <label for="number-input" class="col-sm-4 col-form-label">ì´ ì‚¬ëŒìˆ˜</label>
                     <div class="col-sm-8">
                         <input type="number" @bind="PeopleNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-4 col-form-label">ÃÑ ±×·ì¼ö</label>
+                    <label for="number-input" class="col-sm-4 col-form-label">ì´ ê·¸ë£¹ìˆ˜</label>
                     <div class="col-sm-8">
                         <input type="number" @bind="GroupNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
                     </div>
@@ -32,26 +32,26 @@
     </div>
     <div class="col-md-6">
         <div class="card border-primary mb-4">
-            <div class="card-header bg-primary text-white">»ç¶÷º° Æ¯¼º Ãß°¡/»èÁ¦ ¹× °á°ú</div>
+            <div class="card-header bg-primary text-white">ì‚¬ëŒë³„ íŠ¹ì„± ì¶”ê°€/ì‚­ì œ ë° ê²°ê³¼</div>
             <div class="card-body">
                 <div class="form-group row">
-                    <label for="textbox-input" class="col-sm-3 col-form-label">Æ¯¼º ÀÌ¸§</label>
+                    <label for="textbox-input" class="col-sm-3 col-form-label">íŠ¹ì„± ì´ë¦„</label>
                     <div class="col-sm-6">
                         <input id="textbox-input" type="text" @bind="@newColumn" @oninput="HandleAttributeInput" class="form-control" />
                     </div>
                     <div class="col-sm-3">
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsAddDisabled">Ãß°¡</button>
+                            <button class="btn btn-primary" @onclick="AddColumn" disabled="@IsAddDisabled">ì¶”ê°€</button>
                         </div>
                     </div>
                 </div>
                 <div class="form-group row">
                     <div class="col-sm-6">
-                        <button class="btn btn-primary" @onclick="DoRandom">·£´ı ±×·ì °á°ú</button>                        
+                        <button class="btn btn-primary" @onclick="DoRandom">ëœë¤ ê·¸ë£¹ ê²°ê³¼</button>                        
                     </div>
                     <div class="col-sm-6">
                         <div class="d-flex justify-content-end">
-                            <button class="btn btn-primary btn-block" @onclick="DeleteColumn">»èÁ¦</button>
+                            <button class="btn btn-primary btn-block" @onclick="DeleteColumn">ì‚­ì œ</button>
                         </div>
                     </div>
                 </div>
@@ -208,7 +208,7 @@
         {
             newColumn = "";
             IsAddDisabled = true;
-            // await ShowToastNotification("[°á°ú]¸¦ »ç¿ëÇÒ ¼ö ¾ø½À´Ï´Ù.");
+            // await ShowToastNotification("[ê²°ê³¼]ë¥¼ ì‚¬ìš©í•  ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
             return;
         }
         else if (newColumn != "")
@@ -295,31 +295,31 @@
         var random = new Random();
 
         var firstNames = new List<string>() {
-            "Áö¿ì",
-            "¼­¿¬",
-            "ÇÏÀ±",
-            "¼­Çö",
-            "À±¼­",
-            "¹Î¼­",
-            "¹ÎÁØ",
-            "ÁöÈÆ",
-            "Çö¿ì",
-            "ÁÖ¿ø",
-            "¿¹ÁØ",
-            "µµÀ±"};
+            "ì§€ìš°",
+            "ì„œì—°",
+            "í•˜ìœ¤",
+            "ì„œí˜„",
+            "ìœ¤ì„œ",
+            "ë¯¼ì„œ",
+            "ë¯¼ì¤€",
+            "ì§€í›ˆ",
+            "í˜„ìš°",
+            "ì£¼ì›",
+            "ì˜ˆì¤€",
+            "ë„ìœ¤"};
 
         var genders = new List<string>() {
-            "³²ÀÚ",
-            "¸ğ¸§",
-            "¿©ÀÚ"};
+            "ë‚¨ì",
+            "ëª¨ë¦„",
+            "ì—¬ì"};
 
         var departments = new List<string>() {
-            "°ø´ë",
-            "¹®°ú´ë",
-            "¹ı´ë",
-            "Ã¼´ë",
-            "¹Ì´ë",
-            "»ó°æ´ë"};
+            "ê³µëŒ€",
+            "ë¬¸ê³¼ëŒ€",
+            "ë²•ëŒ€",
+            "ì²´ëŒ€",
+            "ë¯¸ëŒ€",
+            "ìƒê²½ëŒ€"};
 
 
         for (int i = 1; i <= PeopleNumber; i++)
@@ -338,9 +338,9 @@
 
         var builder1 = new ObjectEditorBuilder<Person>(People, GridDirection.PropertiesAcrossColumns);
         builder1.AutogenerateProperties(false)
-            .WithProperty(x => x.FirstName, pd => { pd.Heading = "ÀÌ¸§"; })
-            .WithProperty(x => x.Gender, pd => { pd.Heading = "¼ºº°"; })
-            .WithProperty(x => x.Department, pd => { pd.Heading = "ÇĞ°ú"; });
+            .WithProperty(x => x.FirstName, pd => { pd.Heading = "ì´ë¦„"; })
+            .WithProperty(x => x.Gender, pd => { pd.Heading = "ì„±ë³„"; })
+            .WithProperty(x => x.Department, pd => { pd.Heading = "í•™ê³¼"; });
 
         _editor = builder1.Build();
 
