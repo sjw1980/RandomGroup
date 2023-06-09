@@ -22,9 +22,9 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-4 col-form-label">총 그룹수</label>
+                    <label for="number-input" class="col-sm-4 col-form-label">그룹당 사람수</label>
                     <div class="col-sm-8">
-                        <input type="number" @bind="GroupNumber" class="form-control" @oninput="HandleNumberInput" min="2" max="500" />
+                        <input type="number" @bind="PeopleInGroup" class="form-control" min="2" max="500" />
                     </div>
                 </div>
             </div>
@@ -97,7 +97,7 @@
     private bool IsAddDisabled = true;
 
     private int PeopleNumber { get; set; } = 12;
-    private int GroupNumber { get; set; } = 4;
+    private int PeopleInGroup { get; set; } = 4;
     private int peopleMin = 2;
     private int peopleMax = 500;
     private string newColumn = "";
@@ -160,7 +160,7 @@
 
         List<string[]> Data = new List<string[]>();
         int DateRank = 4;
-        Data.Add(new string[] { "v1", GroupNumber.ToString(), DateRank.ToString() });
+        Data.Add(new string[] { "v1", PeopleInGroup.ToString(), DateRank.ToString() });
 
         List<string> Types = new List<string>();
         List<string> Weights = new List<string>();
