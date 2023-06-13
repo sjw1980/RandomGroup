@@ -171,8 +171,16 @@
         AttributeName.Add("No.");
         for (int col = 0; col < ResultColumn; col++)
         {
+            if (col == 0)
+            {
+                Weights.Add(""); // Name is first
+            }
+            else
+            {
+                Weights.Add("1");
+            }
             Types.Add("TEXT");
-            Weights.Add("1");
+            
             AttributeName.Add(_editor!.Sheet.ColumnHeadings[col].Header);
         }
 
@@ -314,8 +322,6 @@
 
         var departments = new List<string>() {
             "공대",
-            "문과대",
-            "법대",
             "체대",
             "미대",
             "상경대"};

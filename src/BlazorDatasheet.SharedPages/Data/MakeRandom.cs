@@ -468,13 +468,13 @@ namespace BlazorDatasheet.SharedPages.Data
                 string[] targetMember = MemberInfo[0];
 
                 Group targetGroup = AllGroup[0];
-                int minError = int.MaxValue;
+                double minError = double.MaxValue;
                 List<Group> sameGroups = new List<Group>();
 
                 for (int index = 0; index < AllGroup.Count; index++)
                 {
                     Group aGroup = AllGroup[index];
-                    int tempError = GetErrorLevel(aGroup, targetMember);
+                    double tempError = GetErrorLevel(aGroup, targetMember);
 
                     if (tempError < minError)
                     {
@@ -498,7 +498,7 @@ namespace BlazorDatasheet.SharedPages.Data
             }
         }
 
-        public static int GetErrorLevel(Group aGroup, string[] targetMember)
+        public static double GetErrorLevel(Group aGroup, string[] targetMember)
         {
             double ReturnValue = 0;
 
@@ -549,9 +549,9 @@ namespace BlazorDatasheet.SharedPages.Data
 
             if (aGroup.CurrentMemberCount + 1 + MoreFamily > MaximumInGroup)
             {
-                ReturnValue = int.MaxValue;
+                ReturnValue = double.MaxValue;
             }
-            return (int)ReturnValue;
+            return ReturnValue;
         }
 
         public static void AssignMemberWithFamily()
@@ -688,7 +688,7 @@ namespace BlazorDatasheet.SharedPages.Data
                 Console.WriteLine("중요도 순서...");
             }
             int SmallDiff = 10;
-            int Index = (int)Math.Pow(10, SmallDiff);
+            double Index = Math.Pow(10, SmallDiff);
             if (ImportantAttribute.Count > 100)
             {
                 Console.WriteLine("컬럼이 너무 많아요.. 100개까지만...");
