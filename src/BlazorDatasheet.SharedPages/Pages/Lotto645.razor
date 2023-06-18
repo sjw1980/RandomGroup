@@ -1,0 +1,73 @@
+﻿@page "/Lotto645"
+@using BlazorDatasheet.Interfaces
+@using BlazorDatasheet.Data
+
+<PageTitle>로또 645</PageTitle>
+<h1>로또 645</h1>
+
+<div class="col-md-6">
+    <div class="card border-primary mb-4">
+        <div class="card-header bg-primary text-white">새로운 번호 받기</div>
+        <div class="card-body">
+            <div class="form-group row">
+                <div class="col-sm-12">
+                    <button class="btn btn-primary" @onclick="GetNewNumber">누르세용!!</button>                        
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<Datasheet Sheet="sheet"></Datasheet>
+
+@code {
+
+    private Cell[,] cells;
+    private Sheet sheet;
+
+    protected override void OnInitialized()
+    {
+        GenerateGrid();
+        base.OnInitialized();
+    }
+
+    private void GenerateGrid()
+    {
+        cells = new Cell[5, 6];
+
+        for (int row = 0; row < 5; row++)
+        {
+            List<int> oneGame = GetNumbers();
+            for (int col = 0; col < 6; col++)
+            {
+                cells[row, col] = new Cell(oneGame[col]) { Type = "text", IsReadOnly = true };
+            }
+        }
+
+        sheet = new Sheet(5, 6, cells);
+    }
+
+    private void GetNewNumber()
+    {
+        GenerateGrid();
+        StateHasChanged();
+    }
+
+    private List<int> GetNumbers()
+    {
+        List<int> returnValue = new List<int>();
+        Random random = new Random();
+
+        while (returnValue.Count != 6)
+        {
+            int randomValue = random.Next(1, 46);
+            if (!returnValue.Contains(randomValue))
+            {
+                returnValue.Add(randomValue);
+            }
+        }
+
+        returnValue.Sort();
+        return returnValue;
+    }
+}

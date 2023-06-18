@@ -16,13 +16,13 @@ namespace BlazorDatasheet.SharedPages.Data
     {
         public static class Config
         {
-            public static bool AllMember { get; set; } = true;
-            public static bool GroupMember { get; set; } = true;
-            public static bool Attribute { get; set; } = true;
-            public static bool Weights { get; set; } = true;
-            public static bool PreSummary { get; set; } = true;
-            public static bool EndUpSummary { get; set; } = true;
-            public static bool ShowForExcelCopy { get; set; } = true;
+            public static bool AllMember { get; set; } = false;
+            public static bool GroupMember { get; set; } = false;
+            public static bool Attribute { get; set; } = false;
+            public static bool Weights { get; set; } = false;
+            public static bool PreSummary { get; set; } = false;
+            public static bool EndUpSummary { get; set; } = false;
+            public static bool ShowForExcelCopy { get; set; } = false;
         }
     }
 
