@@ -29,6 +29,7 @@ namespace BlazorDatasheet.SharedPages.Data
     internal class Define
     {
         internal const string Result = "결과";
+        internal const string PickMeUp = "Picked";
         internal static readonly int AttritubeTypeColumn = 1;
         internal static readonly int WeightColumn = 2;
         internal static readonly int NameColumn = 3;
