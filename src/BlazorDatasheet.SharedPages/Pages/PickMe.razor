@@ -22,18 +22,16 @@
                     </div>
                 </div>
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-4 col-form-label">조작 버튼</label>
+                    <label for="number-input" class="col-sm-4 col-form-label">뽑기 or 초기화</label>
                     <div class="col-sm-4">
                         <button class="btn btn-primary" @onclick="DoPIckMeUp">Pick Me Up</button>
                     </div>
-                    <!--
                     <div class="col-sm-4">
-                        <button class="btn btn-primary" @onclick="DoInit">모든 체크 없애기</button>
+                        <button class="btn btn-primary" @onclick="DoInit">Pick 처음부터</button>
                     </div>
-                    -->
                 </div>
                 <div class="form-group row">
-                    <label for="number-input" class="col-sm-4 col-form-label">Last Picked</label>
+                    <label for="number-input" class="col-sm-4 col-form-label">당첨된 사람</label>
                     <div class="col-sm-8">
                         <input type="text" id="number-input" readonly value="@lastPicked" />
                     </div>
@@ -41,9 +39,8 @@
             </div>
         </div>
     </div>
-    
-
 </div>
+
 
 
 
@@ -106,6 +103,8 @@
         {
             _editor!.Sheet.TrySetCellValue(row, PickedColumn, false);
         }
+        _editor!.Sheet.SetColumnWidth(PickedColumn, 100.0);
+        lastPicked = "";
     }
 
     private void HandleNumberInput(ChangeEventArgs e)
@@ -181,6 +180,8 @@
         _editor = builder1.Build();
 
         sheet = _editor.Sheet;
+
+        DoInit();
     }
 
 }
